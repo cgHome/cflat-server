@@ -1,0 +1,107 @@
+#cloud-config
+#
+
+# The current version of cloud-init in the Hypriot rpi-64 is 0.7.9
+# When dealing with cloud-init, it is SUPER important to know the version
+# I have wasted many hours creating servers to find out the module I was trying to use wasn't in the cloud-init version I had
+# Documentation: http://cloudinit.readthedocs.io/en/0.7.9/index.html
+
+hostname: cflat-srv
+manage_etc_hosts: true
+
+resize_rootfs: true
+growpart:
+    mode: auto
+    devices: ["/"]
+    ignore_growroot_disabled: false
+
+users: 
+  - name: admin
+    gecos: "Administrator"
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    shell: /bin/bash
+    groups: users,docker,video
+    plain_text_passwd: hypriot
+    lock_passwd: false
+    ssh_pwauth: true
+    chpasswd: { expire: false }
+
+package_update: true
+package_upgrade: true
+package_reboot_if_required: true
+
+packages:
+  - ntp
+  - acl
+
+locale: "en_US.UTF-8"
+timezone: "Europe/Zurich"
+
+write_files:
+    - path: "/etc/docker/daemon.json"
+      owner: "root:root"
+      content: |
+        {
+          "labels": [ "os=linux", "arch=arm64" ],
+          "experimental": true
+        }
+
+# These commands will be ran on every boot
+bootcmd:
+  # Build Persisten-Disc: USB-disk/vol:data -> /var/data
+  - sudo mkdir -p /var/data
+  - sudo mount /dev/disk/by-label/data /var/data
+
+  # Temp: Docker can't create Dir's at container startup at the moment
+  # sudo setfacl -m u:www-data:rwx /var/data/nextcloud
+  - sudo mkdir -p /var/data/nextcloud
+  - sudo chown -R www-data:www-data /var/data/nextcloud/
+  - sudo mkdir -p /var/data/shared_data
+  - sudo chown -R www-data:www-data /var/data/shared_data/
+  - sudo mkdir -p /var/data/video
+  - sudo chown -R www-data:www-data /var/data/video/
+
+
+# These commands will be ran once on first boot only
+runcmd:
+  - [ systemctl, restart, avahi-daemon ]
+  - [ systemctl, restart, docker ]
+  - [ docker, swarm, init ]
+
+  # Workaround 
+  - sudo apt-get update && sudo apt-get install acl
+
+  # portainer
+  - [
+      docker, service, create, 
+       "--detach=false", 
+       "--name", "portainer", 
+       "--publish", "9000:9000", 
+       "--mount", "type=volume,src=portainer_data,dst=/data", 
+       "--mount", "type=bind,src=//var/run/docker.sock,dst=/var/run/docker.sock", 
+       "portainer/portainer", "-H", "unix:///var/run/docker.sock", "--no-auth"
+    ]
+
+ # traefik
+  - [
+      docker, service, create,
+        "--detach=false", 
+        "--name", "traefik",
+        "--constraint=node.role==manager",
+        "--publish", "80:80", 
+        "--publish", "8080:8080",
+        "--mount", "type=bind,source=/var/run/docker.sock,target=/var/run/docker.sock",
+        "--network", "proxy",
+        "traefik",
+        "--docker",
+        "--docker.swarmMode",
+        "--docker.domain=traefik",
+        "--docker.watch",
+        "--api"
+    ]
+
+  # ADD https://hub.docker.com/r/mazzolino/shepherd/
+
+power_state:
+  message: "*** Reboot after runcmd is finished ***"
+#  mode: reboot
