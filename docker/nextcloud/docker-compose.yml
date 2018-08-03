@@ -14,6 +14,7 @@ services:
 
   web:
     build: ./web
+    image: localhost:5000/nginx
     ports:
       - 8080:80
     volumes:

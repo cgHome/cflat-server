@@ -2,6 +2,8 @@
 
 ## Build OS
 
+- https://github.com/DieterReuter/image-builder-rpi64/releases
+
 - flash --userdata ./user-data.yml ./hypriotos-rpi-v1.9.0.img
 
 
@@ -10,6 +12,8 @@
 # - sudo setfacl -m u:www-data:rwx /var/data/nextcloud
 
 https://jaxenter.de/docker-swarm-einfuehrung-65263
+
+docker run --rm -it debian dpkg --print-architecture
 
 traefik:
   image: traefik
@@ -37,6 +41,10 @@ traefik:
         "--docker.watch",
         "--api"
     ]
+    
+
+docker service create --detach=false --name registry --publish 5000:5000 --mount type=bind,src=/var/data/registry,dst=/var/lib/registry cblomart/rpi-registry:latest
+
 
 
 docker run -d -p 80:80 -v nextcloud:/var/www/html -e SQLITE_DATABASE=cloud -e NEXTCLOUD_ADMIN_USER=admin -e NEXTCLOUD_ADMIN_PASSWORD=hypriot nextcloud:latest
@@ -49,3 +57,60 @@ docker run -d -p 80:80 -v nextcloud:/var/www/html -e SQLITE_DATABASE=cloud -e NE
       - "--docker.swarmMode"
       - "--docker.domain=cflat-srv"
       - "--docker.watch"
+
+# new
+
+  # shepherd
+  - [
+      docker, service, create, 
+       "--detach=false", 
+       "--name", "shepherd",
+       "--replicas", "1",
+       "--constraint", "node.role==manager",
+       "--env", "SLEEP_TIME='1440m'",
+       "--mount", "type=bind,src=//var/run/docker.sock,dst=/var/run/docker.sock,ro", 
+       "mazzolino/shepherd"
+    ]
+
+
+curl -i http://localhost:5000/v2/
+
+rm -rf cflat-server && curl -L https://github.com/cgHome/cflat-server/tarball/master | tar xz --strip=1 --one-top-level=cflat-server
+
+docker-compose -f docker-compose.yml bundle --push-images stack.dab
+docker stack deploy --bundle-file stack.dab 
+
+
+docker stack deploy --bundle-file $(docker-compose -f docker-compose.yml bundle --push-images)
+
+
+docker service create \
+    --name shepherd \
+    --no-resolve-image \
+    --replicas 1 \
+    --constraint "node.role==manager" \
+    --env SLEEP_TIME="5m" \
+    --env BLACKLIST_SERVICES="shepherd" \
+    --mount type=bind,source=/var/run/docker.sock,target=/var/run/docker.sock,ro \
+    mazzolino/shepherd
+
+docker service create \
+    --detach=false \
+    --no-resolve-image \
+    --name registry \
+    --publish 5000:5000 \
+    --replicas 1 \
+    --constraint 'node.role == manager' \
+    --mount type=bind,src=/var/data/registry,dst=/var/lib/registry \
+    cblomart/rpi-registry
+
+docker volume create portainer_data
+docker service create \
+    --name portainer \
+    --publish 9000:9000 \
+    --replicas=1 \
+    --constraint 'node.role == manager' \
+    --mount type=bind,src=//var/run/docker.sock,dst=/var/run/docker.sock \
+    --mount type=volume,src=portainer_data,dst=/data \
+    portainer/portainer \
+        -H unix:///var/run/docker.sock --no-auth
