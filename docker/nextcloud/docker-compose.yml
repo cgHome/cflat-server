@@ -2,7 +2,8 @@ version: '3.6'
 
 services:
   app:
-    image: nextcloud:fpm-alpine
+    build: ./app
+    image: 127.0.0.1:5000/nextcloud:fpm-alpine
     volumes:
       - nextcloud:/var/www/html
     environment:

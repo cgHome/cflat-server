@@ -77,7 +77,8 @@ curl -i http://localhost:5000/v2/
 
 rm -rf cflat-server && curl -L https://github.com/cgHome/cflat-server/tarball/master | tar xz --strip=1 --one-top-level=cflat-server
 
-docker-compose -f docker-compose.yml bundle --push-images stack.dab
+docker-compose -f docker-compose.yml bundle --push-images
+docker-compose -f docker-compose.yml --verbose bundle --push-images
 docker stack deploy --bundle-file stack.dab 
 
 
