@@ -2,8 +2,7 @@ version: '3.6'
 
 services:
   app:
-    build: ./app
-    image: 127.0.0.1:5000/nextcloud:fpm-alpine
+    image: nextcloud:fpm-alpine
     volumes:
       - nextcloud:/var/www/html
     environment:
@@ -15,7 +14,7 @@ services:
 
   web:
     build: ./web
-    image: 127.0.0.1:5000/nginx
+    image: 127.0.0.1:5000/nginx:latest
     ports:
       - 8080:80
     volumes:
