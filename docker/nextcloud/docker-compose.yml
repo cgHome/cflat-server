@@ -2,25 +2,19 @@ version: '3.6'
 
 services:
   app:
-    image: nextcloud:fpm-alpine
-    volumes:
-      - nextcloud:/var/www/html
-    environment:
-      - SQLITE_DATABASE=cloud
-      - PUID=33
-      - PGID=33
-      - NEXTCLOUD_ADMIN_USER=admin
-      - NEXTCLOUD_ADMIN_PASSWORD=hypriot
-
-  web:
-    build: ./web
-    image: 127.0.0.1:5000/nginx:latest
+    image: lsioarmhf/nextcloud-aarch64
     ports:
       - 8080:80
     volumes:
-      - nextcloud:/var/www/html:ro
-    depends_on:
-      - app
+      - nextcloud:/var/www/html
+    networks:
+      - proxy_backend-net
+    environment:
+      SQLITE_DATABASE: cloud
+      PUID: 33		#www-data	
+      PGID: 33		#www-data
+      NEXTCLOUD_ADMIN_USER: admin
+      NEXTCLOUD_ADMIN_PASSWORD: hypriot
     deploy:
       labels:
         traefik.enable: "false"       # todo: cflat-srv/cloud is not working -> use: sflat-srv:8080  

@@ -1,0 +1,42 @@
+version: '3.6'
+
+services:
+  dashboard:
+    image: lsioarmhf/heimdall-aarch64
+    ports:
+      - 8080:80
+    volumes:
+      - /var/data/heimdall:/var/www/html
+    networks:
+      - proxy_backend-net
+    environment:
+      PUID: 33		#www-data	
+      PGID: 33		#www-data
+      TZ: 'ls -la /etc/localtime | cut -d/ -f7-9'
+    deploy:
+      placement:
+        constraints: [node.role == manager]
+      update_config:
+        parallelism: 1
+        delay: 10s
+      restart_policy:
+        condition: on-failure
+      labels:
+        traefik.enable: "true"  
+        traefik.port: "8080"
+        traefik.frontend.rule: "PathPrefixStrip: /dashboard"
+        traefik.backend: "heimdall"
+        traefik.docker.network: "proxy_backend-net"
+
+volumes:
+  heimdall:
+    name: "heimdall"
+    driver_opts:
+      type: "none"
+      device: "/var/data/heimdall"
+      o: "bind"
+
+networks: 
+  proxy_backend-net:
+    name: proxy_backend-net
+    external: true

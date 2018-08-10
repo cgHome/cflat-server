@@ -25,7 +25,7 @@ traefik:
     - /var/run/docker.sock:/var/run/docker.sock
     - /dev/null:/traefik.toml
 
- # traefik
+  # traefik
   - [
       docker, service, create,
         "--name", "traefik",
@@ -42,6 +42,36 @@ traefik:
         "--api"
     ]
     
+  # registry
+  - [ sudo, mkdir, -p, /var/data/registry ]
+  - [
+      docker, service, create, 
+       "--detach=false",
+       "--name", "registry",
+       "--publish", "5000:5000",
+       "--replicas", "1",
+       "--constraint", "node.role==manager",
+       "--mount", "type=bind,src=/var/data/registry,dst=/var/lib/registry,ro",
+       "--no-resolve-image",
+       "cblomart/rpi-registry"
+    ]
+
+  # portainer
+  - [ docker, volume, create, portainer_data ]
+  - [ 
+      docker, service, create, 
+        "--detach=false", 
+        "--name", "portainer", 
+        "--publish", "9000:9000",
+        "--replicas=1",
+        "--constraint", "node.role == manager",
+        "--mount", "type=bind,src=//var/run/docker.sock,dst=/var/run/docker.sock,ro", 
+        "--mount", "type=volume,src=portainer_data,dst=/data", 
+        "portainer/portainer", 
+          "-H", "unix:///var/run/docker.sock", "--no-auth"
+    ]
+
+
 
 docker service create --detach=false --name registry --publish 5000:5000 --mount type=bind,src=/var/data/registry,dst=/var/lib/registry cblomart/rpi-registry:latest
 
@@ -115,3 +145,11 @@ docker service create \
     --mount type=volume,src=portainer_data,dst=/data \
     portainer/portainer \
         -H unix:///var/run/docker.sock --no-auth
+
+docker create \
+  --name=heimdall \
+  -v /var/data/heimdal:/config \
+  -e PGID=33 -e PUID=33  \
+  -p 8080:80 \
+  -e TZ='ls -la /etc/localtime | cut -d/ -f7-9' \
+  lsioarmhf/heimdall-aarch64
