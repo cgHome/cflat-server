@@ -6,7 +6,7 @@ services:
     environment:
       # REQUIRED: Should be equal to the service name prefixed by "tasks." when
       # deployed inside an overlay network
-      AGENT_CLUSTER_ADDR: tasks.agent
+      AGENT_CLUSTER_ADDR: tasks.portainer_agent
       # AGENT_PORT: 9001
       # LOG_LEVEL: debug
     volumes:
