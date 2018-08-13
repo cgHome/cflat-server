@@ -20,7 +20,7 @@ services:
 
   portainer:
     image: portainer/portainer
-    command: -H tcp://tasks.agent:9001 --tlsskipverify --no-auth
+    command: -H tcp://tasks.portainer_agent:9001 --tlsskipverify --no-auth
     ports:
       - "9000:9000"
     volumes:
