@@ -66,8 +66,7 @@ runcmd:
 
   - curl -L https://github.com/cgHome/cflat-server/tarball/master | tar xz -C /home/admin --strip=1 --one-top-level=cflat-server
   
-  - cd /home/admin/cflat-server
-  - docker stack deploy --compose-file=docker/portainer/docker-compose.yml portainer
+  - docker stack deploy --compose-file /home/admin/cflat-server/docker/portainer/docker-compose.yml portainer
 
   # registry
   - [ sudo, mkdir, -p, /var/data/registry ]

@@ -4,7 +4,9 @@ services:
   app:
     image: lsioarmhf/heimdall-aarch64
     volumes:
-      - /var/data/heimdall:/config
+      - type: bind
+        source: /var/data/heimdall 
+        target: /config
     networks:
       - proxy-net
     environment:
