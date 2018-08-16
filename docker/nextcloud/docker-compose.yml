@@ -2,37 +2,39 @@ version: '3.6'
 
 services:
   app:
-    image: lsioarmhf/nextcloud-aarch64
-    ports:
-      - 8080:80
+    image: nextcloud:latest
     volumes:
-      - nextcloud:/var/www/html
+      - type: volume
+        source: config
+        target: /var/www/html
+      - type: bind
+        source: /var/data/cloud 
+        target: /var/www/html/data
     networks:
-      - proxy_backend-net
+      - proxy-net
     environment:
-      SQLITE_DATABASE: cloud
       PUID: 33		#www-data	
       PGID: 33		#www-data
+      SQLITE_DATABASE: cloud
       NEXTCLOUD_ADMIN_USER: admin
       NEXTCLOUD_ADMIN_PASSWORD: hypriot
     deploy:
+      update_config:
+        parallelism: 1
+        delay: 10s
+      restart_policy:
+        condition: on-failure
       labels:
-        traefik.enable: "false"       # todo: cflat-srv/cloud is not working -> use: sflat-srv:8080  
+        traefik.enable: "true"        # todo: cflat-srv/cloud is not working -> use: sflat-srv:88  
         traefik.backend: "nextcloud"
-        #traefik.frontend.rule=Host:cloud.${HOSTNAME}.local"  
-        traefik.frontend.rule: "PathPrefixStrip:/cloud"
-        traefik.port: "8080"
-        traefik.docker.network: "proxy_backend-net"
+        traefik.frontend.rule: "Host:${HOSTNAME}; PathPrefixStrip:/cloud"
+        traefik.port: "80"
+        traefik.docker.network: "traefik_proxy-net"
 
 volumes:
-  nextcloud:
-    name: "nextcloud"
-    driver_opts:
-      type: "none"
-      device: "/var/data/nextcloud"
-      o: "bind"
+  config:
 
 networks: 
-  proxy_backend-net:
-    name: proxy_backend-net
+  proxy-net:
+    name: traefik_proxy-net
     external: true

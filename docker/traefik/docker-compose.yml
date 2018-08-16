@@ -1,10 +1,10 @@
-version: "3.6"
+version: '3.6'
+
 services:
-  traefik:
-    image: traefik
+  app:
+    image: traefik:latest
     command:
       - "--api"
-      - "--logLevel=INFO"
       #- "--entrypoints=Name:http Address::80 Redirect.EntryPoint:https"
       - "--entrypoints=Name:http Address::80"
       - "--entrypoints=Name:https Address::443 TLS"
@@ -13,35 +13,35 @@ services:
       - "--docker.swarmMode"
       - "--docker.domain=localhost"
       - "--docker.watch"
+      - "--logLevel=INFO"
     networks:
-      - backend-net
+      - proxy-net
     ports:
       - 80:80
       - 443:443
-      #- 8080:8080
+      - 8080:8080
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - /dev/null:/traefik.toml
+      #- /dev/null:/traefik.toml
       #- /dev/null:/acme.json
     deploy:
-      labels:
-        traefik.enable: "true"
-        traefik.backend: "traefik"
-        #traefik.frontend.rule=Host:traefik.${HOSTNAME}.local"  
-        traefik.frontend.rule: "PathPrefixStrip:/traefik"
-        traefik.port: "8080"
-        traefik.docker.network: "proxy_backend-net"
       mode: global
       placement:
-        constraints:
-          - node.role == manager
+        constraints: [node.role == manager]
       update_config:
         parallelism: 1
         delay: 10s
       restart_policy:
         condition: on-failure
+      labels:
+        traefik.enable: "false"
+        traefik.backend: "traefik"
+        #traefik.frontend.rule=Host:traefik.${HOSTNAME}.local"
+        traefik.frontend.rule: "PathPrefixStrip:/traefik"
+        traefik.port: "8080"
+        traefik.docker.network: "traefik_proxy-net"
 
 networks:
-  backend-net:
-    name: proxy_backend-net
+  proxy-net:
+    name: traefik_proxy-net
     driver: overlay

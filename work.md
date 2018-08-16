@@ -28,7 +28,7 @@ traefik:
   # traefik
   - [
       docker, service, create,
-        "--name", "traefik",
+        "--name" , "traefik",
         "--constraint=node.role==manager",
         "--publish", "80:80", 
         "--publish", "8080:8080",

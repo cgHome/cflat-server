@@ -4,13 +4,11 @@ services:
   agent:
     image: portainer/agent
     environment:
-      # REQUIRED: Should be equal to the service name prefixed by "tasks." when
-      # deployed inside an overlay network
       AGENT_CLUSTER_ADDR: tasks.portainer_agent
       # AGENT_PORT: 9001
       # LOG_LEVEL: debug
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
+      - /var/run/docker.sock:/var/run/docker.sock:ro
     networks:
       - agent_network
     deploy:
@@ -18,13 +16,13 @@ services:
       placement:
         constraints: [node.platform.os == linux]
 
-  portainer:
+  app:
     image: portainer/portainer
     command: -H tcp://tasks.portainer_agent:9001 --tlsskipverify --no-auth
-    ports:
-      - "9000:9000"
+    expose:
+      - "9000"
     volumes:
-      - portainer_data:/data
+      - data:/data
     networks:
       - agent_network
     deploy:
@@ -32,11 +30,22 @@ services:
       replicas: 1
       placement:
         constraints: [node.role == manager]
-
-networks:
-  agent_network:
-    driver: overlay
-    attachable: true
+      update_config:
+        parallelism: 1
+        delay: 10s
+      restart_policy:
+        condition: on-failure
+      labels:
+        traefik.enable: "true"  
+        traefik.backend: "heimdall"
+        traefik.frontend.rule: "PathPrefixStrip:/portainer"
+        traefik.port: "9000"
+        traefik.docker.network: "traefik_proxy-net"
 
 volumes:
-  portainer_data:
+  data:
+
+networks: 
+  proxy-net:
+    name: traefik_proxy-net
+    external: true

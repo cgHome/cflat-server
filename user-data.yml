@@ -52,6 +52,8 @@ bootcmd:
   - sudo mkdir -p /var/data
   - sudo mount /dev/disk/by-label/data /var/data
   - sudo chown -R www-data:www-data /var/data/
+  
+  - rm -rf $PWD/cflat-server && curl -L https://github.com/cgHome/cflat-server/tarball/master | tar xz -C $PWD --strip=1 --one-top-level=cflat-server
 
 # These commands will be ran once on first boot only
 runcmd:
@@ -63,8 +65,8 @@ runcmd:
   - sudo apt-get update && sudo apt-get install acl
 
   - curl -L https://github.com/cgHome/cflat-server/tarball/master | tar xz -C /home/admin --strip=1 --one-top-level=cflat-server
-  - cd /home/admin/cflat-server
   
+  - cd /home/admin/cflat-server
   - docker stack deploy --compose-file=docker/portainer/docker-compose.yml portainer
 
   # registry
