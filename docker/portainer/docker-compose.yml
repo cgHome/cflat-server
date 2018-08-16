@@ -19,6 +19,8 @@ services:
   app:
     image: portainer/portainer
     command: -H tcp://tasks.portainer_agent:9001 --tlsskipverify --no-auth
+    ports:
+      - "9000:9000"
     volumes:
       - data:/data
     networks:
@@ -34,9 +36,9 @@ services:
       restart_policy:
         condition: on-failure
       labels:
-        traefik.enable: "true"  
+        traefik.enable: "false"  
         traefik.backend: "portainer"
-        traefik.frontend.rule: "Host:${HOSTNAME};PathPrefixStrip:/portainer"
+        traefik.frontend.rule: "PathPrefixStrip:/portainer"
         traefik.port: "9000"
         traefik.docker.network: "traefik_proxy-net"
 
