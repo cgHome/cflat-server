@@ -29,6 +29,7 @@ services:
         traefik.backend: "nextcloud"
         traefik.frontend.rule: "Host:${HOSTNAME}; PathPrefixStrip:/cloud"
         traefik.port: "80"
+        traefik.default.protocol: "http"
         traefik.docker.network: "traefik_proxy-net"
 
 volumes:
