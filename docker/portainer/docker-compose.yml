@@ -45,7 +45,10 @@ services:
 volumes:
   data:
 
-networks: 
+networks:
+  agent_network:
+    driver: overlay
+    attachable: true 
   proxy-net:
     name: traefik_proxy-net
     external: true
