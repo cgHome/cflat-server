@@ -36,9 +36,8 @@ services:
       labels:
         traefik.enable: "true"  
         traefik.backend: "portainer"
-        traefik.frontend.rule: "Host:${HOSTNAME}; PathPrefixStrip:/portainer"
+        traefik.frontend.rule: "Host:${HOSTNAME};PathPrefixStrip:/portainer"
         traefik.port: "9000"
-        traefik.default.protocol: "http"
         traefik.docker.network: "traefik_proxy-net"
 
 volumes:
