@@ -10,7 +10,7 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     networks:
-      - agent_network
+      - agent-net
     deploy:
       mode: global
       placement:
@@ -19,12 +19,10 @@ services:
   app:
     image: portainer/portainer
     command: -H tcp://tasks.portainer_agent:9001 --tlsskipverify --no-auth
-    expose:
-      - "9000"
     volumes:
       - data:/data
     networks:
-      - agent_network
+      - agent-net
     deploy:
       mode: replicated
       replicas: 1
@@ -37,7 +35,7 @@ services:
         condition: on-failure
       labels:
         traefik.enable: "true"  
-        traefik.backend: "heimdall"
+        traefik.backend: "portainer"
         traefik.frontend.rule: "PathPrefixStrip:/portainer"
         traefik.port: "9000"
         traefik.docker.network: "traefik_proxy-net"
@@ -46,7 +44,7 @@ volumes:
   data:
 
 networks:
-  agent_network:
+  agent-net:
     driver: overlay
     attachable: true 
   proxy-net:
