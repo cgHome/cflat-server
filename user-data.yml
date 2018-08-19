@@ -66,13 +66,14 @@ runcmd:
 
   - curl -L https://github.com/cgHome/cflat-server/tarball/master | tar xz -C /home/admin --strip=1 --one-top-level=cflat-server
   
-  # - docker stack deploy -c /home/admin/cflat-server/docker/portainer/docker-compose.yml portainer
-  - sudo mkdir -p /var/data/portainer
-  - docker network create --driver overlay --attachable portainer_agent-net
-  - docker service create --detach=false --name portainer_agent --network portainer_agent-net -e  AGENT_CLUSTER_ADDR=tasks.portainer_agent --mode global --constraint 'node.platform.os == linux' --mount type=bind,src=//var/run/docker.sock,dst=/var/run/docker.sock portainer/agent
-  - docker service create --detach=false --name portainer_app --network portainer_agent-net --publish 9000:9000 --replicas=1 --constraint 'node.role == manager' --mount type=bind,src=/var/data/portainer,dst=/data portainer/portainer -H 'tcp://tasks.portainer_agent:9001' --tlsskipverify --no-auth
+  - docker stack deploy -c /home/admin/cflat-server/docker/mbase-stack.yml mbase
 
-  - docker stack deploy -c /home/admin/cflat-server/docker/traefik/docker-compose.yml traefik
+  # - docker stack deploy -c /home/admin/cflat-server/docker/portainer/docker-compose.yml portainer
+  #- sudo mkdir -p /var/data/portainer
+  #- docker network create --driver overlay --attachable portainer_agent-net
+  #- docker service create --detach=false --name portainer_agent --network portainer_agent-net -e  AGENT_CLUSTER_ADDR=tasks.portainer_agent --mode global --constraint 'node.platform.os == linux' --mount type=bind,src=//var/run/docker.sock,dst=/var/run/docker.sock portainer/agent
+  #- docker service create --detach=false --name portainer_app --network portainer_agent-net --publish 9000:9000 --replicas=1 --constraint 'node.role == manager' --mount type=bind,src=/var/data/portainer,dst=/data portainer/portainer -H 'tcp://tasks.portainer_agent:9001' --tlsskipverify --no-auth
+
  
   # registry
   - [ sudo, mkdir, -p, /var/data/registry ]

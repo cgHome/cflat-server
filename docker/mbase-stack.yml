@@ -35,7 +35,7 @@ services:
       #- /dev/null:/traefik.toml
       #- /dev/null:/acme.json
     labels:
-      traefik.enable: "false"
+      traefik.enable: "true"
       traefik.backend: "traefik"
       #traefik.frontend.rule=Host:traefik.${HOSTNAME}.local"
       traefik.frontend.rule: "PathPrefixStrip:/traefik"
@@ -70,13 +70,15 @@ services:
   portainer:
     image: portainer/portainer
     command: -H tcp://tasks.agent:9001 --tlsskipverify --no-auth
+    ports:
+      - 9000:9000
     volumes:
       - portainer-data:/data
     networks:
       - agent-net
       - proxy-net
     labels:
-      traefik.enable: "true"   # ToDo -> PathPrefixStrip
+      traefik.enable: "false"   # ToDo -> PathPrefixStrip
       traefik.backend: "portainer"
       traefik.frontend.rule: "PathPrefixStrip:/portainer"
       traefik.port: "9000"
