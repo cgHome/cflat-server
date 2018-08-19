@@ -1,5 +1,7 @@
 version: '3.6'
 
+# see: https://github.com/portainer/portainer/issues/2148
+
 networks:
   agent-net:
     driver: overlay
@@ -46,10 +48,10 @@ services:
         condition: on-failure
       labels:
         traefik.enable: "true"
+        traefik.port: "8080"
         traefik.backend: "traefik"
         #traefik.frontend.rule=Host:traefik.${HOSTNAME}.local"
         traefik.frontend.rule: "PathPrefixStrip:/traefik"
-        traefik.port: "8080"
         traefik.docker.network: "mbase_proxy-net"
 
   agent:
@@ -71,8 +73,6 @@ services:
   portainer:
     image: portainer/portainer
     command: -H tcp://tasks.agent:9001 --tlsskipverify --no-auth
-    ports:
-      - 9000:9000
     volumes:
       - portainer-data:/data
     networks:
@@ -89,8 +89,8 @@ services:
       restart_policy:
         condition: on-failure
       labels:
-        traefik.enable: "false"   # ToDo -> PathPrefixStrip
+        traefik.enable: "true"   # ToDo -> PathPrefixStrip
+        traefik.port: "9000"
         traefik.backend: "portainer"
         traefik.frontend.rule: "PathPrefixStrip:/portainer"
-        traefik.port: "9000"
         traefik.docker.network: "mbase_proxy-net"
