@@ -10,7 +10,7 @@ services:
     environment:
       PUID: 33		#www-data	
       PGID: 33		#www-data
-      TZ: $(ls -la /etc/localtime | cut -d/ -f8-9)
+      # TZ: $(ls -la /etc/localtime | cut -d/ -f8-9)
     deploy:
       placement:
         constraints: [node.role == manager]
