@@ -5,6 +5,7 @@ networks:
     driver: overlay
     attachable: true
   proxy-net:
+    name: mbase_proxy-net
     driver: overlay
 
 volumes:
@@ -34,13 +35,6 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       #- /dev/null:/traefik.toml
       #- /dev/null:/acme.json
-    labels:
-      traefik.enable: "true"
-      traefik.backend: "traefik"
-      #traefik.frontend.rule=Host:traefik.${HOSTNAME}.local"
-      traefik.frontend.rule: "PathPrefixStrip:/traefik"
-      traefik.port: "8080"
-      traefik.docker.network: "proxy-net"
     deploy:
       mode: global
       placement:
@@ -50,6 +44,13 @@ services:
         delay: 10s
       restart_policy:
         condition: on-failure
+      labels:
+        traefik.enable: "true"
+        traefik.backend: "traefik"
+        #traefik.frontend.rule=Host:traefik.${HOSTNAME}.local"
+        traefik.frontend.rule: "PathPrefixStrip:/traefik"
+        traefik.port: "8080"
+        traefik.docker.network: "mbase_proxy-net"
 
   agent:
     image: portainer/agent
@@ -77,12 +78,6 @@ services:
     networks:
       - agent-net
       - proxy-net
-    labels:
-      traefik.enable: "false"   # ToDo -> PathPrefixStrip
-      traefik.backend: "portainer"
-      traefik.frontend.rule: "PathPrefixStrip:/portainer"
-      traefik.port: "9000"
-      traefik.docker.network: "proxy-net"
     deploy:
       mode: replicated
       replicas: 1
@@ -93,3 +88,9 @@ services:
         delay: 10s
       restart_policy:
         condition: on-failure
+      labels:
+        traefik.enable: "false"   # ToDo -> PathPrefixStrip
+        traefik.backend: "portainer"
+        traefik.frontend.rule: "PathPrefixStrip:/portainer"
+        traefik.port: "9000"
+        traefik.docker.network: "mbase_proxy-net"
