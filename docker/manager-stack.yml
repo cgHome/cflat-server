@@ -1,0 +1,93 @@
+version: '3.6'
+
+networks:
+  agent-net:
+    driver: overlay
+    attachable: true
+  proxy-net:
+    driver: overlay
+
+volumes:
+  portainer-data:
+
+services:
+  traefik:
+    image: traefik:latest
+    command:
+      - "--api"
+      #- "--entrypoints=Name:http Address::80 Redirect.EntryPoint:https"
+      - "--entrypoints=Name:http Address::80"
+      - "--entrypoints=Name:https Address::443 TLS"
+      - "--defaultentrypoints=http,https"
+      - "--docker"
+      - "--docker.swarmMode"
+      - "--docker.domain=localhost"
+      - "--docker.watch"
+      - "--logLevel=INFO"
+    networks:
+      - proxy-net
+    ports:
+      - 80:80
+      - 443:443
+      #- 8080:8080
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      #- /dev/null:/traefik.toml
+      #- /dev/null:/acme.json
+    labels:
+      traefik.enable: "false"
+      traefik.backend: "traefik"
+      #traefik.frontend.rule=Host:traefik.${HOSTNAME}.local"
+      traefik.frontend.rule: "PathPrefixStrip:/traefik"
+      traefik.port: "8080"
+      traefik.docker.network: "proxy-net"
+    deploy:
+      mode: global
+      placement:
+        constraints: [node.role == manager]
+      update_config:
+        parallelism: 1
+        delay: 10s
+      restart_policy:
+        condition: on-failure
+
+  agent:
+    image: portainer/agent
+    environment:
+      AGENT_CLUSTER_ADDR: tasks.agent
+      # AGENT_PORT: 9001
+      # LOG_LEVEL: debug
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /var/lib/docker/volumes:/var/lib/docker/volumes
+    networks:
+      - agent-net
+    deploy:
+      mode: global
+      placement:
+        constraints: [node.platform.os == linux]
+
+  portainer:
+    image: portainer/portainer
+    command: -H tcp://tasks.agent:9001 --tlsskipverify --no-auth
+    volumes:
+      - portainer-data:/data
+    networks:
+      - agent-net
+      - proxy-net
+    labels:
+      traefik.enable: "true"   # ToDo -> PathPrefixStrip
+      traefik.backend: "portainer"
+      traefik.frontend.rule: "PathPrefixStrip:/portainer"
+      traefik.port: "9000"
+      traefik.docker.network: "proxy-net"
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints: [node.role == manager]
+      update_config:
+        parallelism: 1
+        delay: 10s
+      restart_policy:
+        condition: on-failure

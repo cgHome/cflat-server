@@ -25,6 +25,8 @@ services:
       - data:/data
     networks:
       - agent-net
+    depends_on:
+      - agent
     deploy:
       mode: replicated
       replicas: 1
