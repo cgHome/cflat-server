@@ -1,14 +1,14 @@
 version: '3.6'
 
-# see: https://github.com/portainer/portainer/issues/2148
+## -> add [trafik] proxy 
 
 networks:
   agent-net:
     driver: overlay
     attachable: true
-# proxy-net:
-#   name: traefik_proxy-net
-#   external: true
+##proxy-net:
+##  name: traefik_proxy-net
+##  external: true
 
 services:
   agent:
@@ -36,7 +36,7 @@ services:
       - 9000:9000
     networks:
       - agent-net
-      - proxy-net
+    ##- proxy-net
     depends_on:
       - agent
     deploy:
