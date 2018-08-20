@@ -37,7 +37,7 @@ services:
       - 9000:9000
     networks:
       - agent-net
-    ##- proxy-net
+      #- proxy-net
     depends_on:
       - agent
     deploy:
