@@ -6,9 +6,9 @@ networks:
   agent-net:
     driver: overlay
     attachable: true
-  proxy-net:
-    name: traefik_proxy-net
-    external: true
+# proxy-net:
+#   name: traefik_proxy-net
+#   external: true
 
 services:
   agent:
@@ -29,7 +29,7 @@ services:
 
   portainer:
     image: portainer/portainer
-    command: -H tcp://tasks.agent:9001 --tlsskipverify --no-auth
+    command: -H tcp://tasks.agent:9001 --tlsskipverify --no-auth --templates https://raw.githubusercontent.com/cgHome/cflat-server/master/portainer/templates.json
     volumes:
       - portainer-data:/data
     ports:
