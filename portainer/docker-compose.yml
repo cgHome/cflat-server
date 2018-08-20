@@ -10,6 +10,9 @@ networks:
 ##  name: traefik_proxy-net
 ##  external: true
 
+volumes:
+  portainer-data:
+
 services:
   agent:
     image: portainer/agent
