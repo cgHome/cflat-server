@@ -1,5 +1,10 @@
 version: '3.6'
 
+networks: 
+  proxy-net:
+    name: mbase_proxy-net
+    external: true
+
 services:
   app:
     image: lsioarmhf/heimdall-aarch64
@@ -25,8 +30,3 @@ services:
         traefik.backend: "heimdall"
         traefik.frontend.rule: "PathPrefixStrip:/"
         traefik.docker.network: "mbase_proxy-net"
-
-networks: 
-  proxy-net:
-    name: mbase_proxy-net
-    external: true
