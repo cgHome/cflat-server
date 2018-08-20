@@ -1,14 +1,12 @@
 version: '3.6'
 
-## -> add [trafik] proxy 
-
 networks:
   agent-net:
     driver: overlay
     attachable: true
-##proxy-net:
-##  name: traefik_proxy-net
-##  external: true
+# proxy-net:
+#   name: traefik_proxy-net
+#   external: true
 
 volumes:
   portainer-data:

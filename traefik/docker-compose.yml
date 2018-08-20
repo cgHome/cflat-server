@@ -5,9 +5,6 @@ networks:
     name: traefik_proxy-net
     driver: overlay
 
-volumes:
-  portainer-data:
-
 services:
   traefik:
     image: traefik:latest
