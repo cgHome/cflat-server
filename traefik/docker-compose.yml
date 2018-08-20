@@ -1,7 +1,15 @@
 version: '3.6'
 
+networks:
+  proxy-net:
+    name: traefik_proxy-net
+    driver: overlay
+
+volumes:
+  portainer-data:
+
 services:
-  app:
+  traefik:
     image: traefik:latest
     command:
       - "--api"
@@ -19,7 +27,7 @@ services:
     ports:
       - 80:80
       - 443:443
-      - 8080:8080
+      #- 8080:8080
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       #- /dev/null:/traefik.toml
@@ -34,14 +42,8 @@ services:
       restart_policy:
         condition: on-failure
       labels:
-        traefik.enable: "false"
-        traefik.backend: "traefik"
-        #traefik.frontend.rule=Host:traefik.${HOSTNAME}.local"
-        traefik.frontend.rule: "PathPrefixStrip:/traefik"
+        traefik.enable: "true"
         traefik.port: "8080"
+        traefik.backend: "traefik"
+        traefik.frontend.rule: "PathPrefixStrip:/traefik"
         traefik.docker.network: "traefik_proxy-net"
-
-networks:
-  proxy-net:
-    name: traefik_proxy-net
-    driver: overlay

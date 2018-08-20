@@ -2,7 +2,7 @@ version: '3.6'
 
 networks: 
   proxy-net:
-    name: mbase_proxy-net
+    name: traefik_proxy-net
     external: true
 
 services:
@@ -29,4 +29,4 @@ services:
         traefik.port: "80"
         traefik.backend: "heimdall"
         traefik.frontend.rule: "PathPrefixStrip:/"
-        traefik.docker.network: "mbase_proxy-net"
+        traefik.docker.network: "traefik_proxy-net"

@@ -53,7 +53,7 @@ bootcmd:
   - sudo mount /dev/disk/by-label/data /var/data
   - sudo chown -R www-data:www-data /var/data/
   
-  - sudo rm -rf $PWD/cflat-server && curl -L https://github.com/cgHome/cflat-server/tarball/master | tar xz -C $PWD --strip=1 --one-top-level=cflat-server
+  #- sudo rm -rf $PWD/cflat-server && curl -L https://github.com/cgHome/cflat-server/tarball/master | tar xz -C $PWD --strip=1 --one-top-level=cflat-server
 
 # These commands will be ran once on first boot only
 runcmd:
@@ -64,7 +64,13 @@ runcmd:
   # Workaround 
   - sudo apt-get update && sudo apt-get install acl
 
-  - curl -L https://github.com/cgHome/cflat-server/tarball/master | tar xz -C /home/admin --strip=1 --one-top-level=cflat-server
+  #- curl -L https://github.com/cgHome/cflat-server/tarball/master | tar xz -C /home/admin --strip=1 --one-top-level=cflat-server
+  #- docker stack deploy -c /home/admin/cflat-server/portainer/docker-compose.yml portainer
+
+  #- sudo mkdir -p /var/data/portainer
+  #- docker network create --driver overlay --attachable traefik_agent-net
+  #- docker service create --detach=false --name portainer_agent --network traefik_agent-net -e  AGENT_CLUSTER_ADDR=tasks.portainer_agent --mode global --constraint 'node.platform.os == linux' --mount type=bind,src=//var/run/docker.sock,dst=/var/run/docker.sock portainer/agent
+  #- docker service create --detach=false --name portainer_app --network traefik_agent-net --publish 9000:9000 --replicas=1 --constraint 'node.role == manager' --mount type=bind,src=/var/data/portainer,dst=/data portainer/portainer -H 'tcp://tasks.portainer_agent:9001' --tlsskipverify --no-auth
   
   # registry
   - [ sudo, mkdir, -p, /var/data/registry ]
