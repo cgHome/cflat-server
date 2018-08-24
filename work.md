@@ -125,31 +125,14 @@ docker service create \
     --mount type=bind,source=/var/run/docker.sock,target=/var/run/docker.sock,ro \
     mazzolino/shepherd
 
-docker service create \
-    --detach=false \
-    --no-resolve-image \
-    --name registry \
-    --publish 5000:5000 \
-    --replicas 1 \
-    --constraint 'node.role == manager' \
-    --mount type=bind,src=/var/data/registry,dst=/var/lib/registry \
-    cblomart/rpi-registry
-
-docker volume create portainer_data
-docker service create \
-    --name portainer \
-    --publish 9000:9000 \
-    --replicas=1 \
-    --constraint 'node.role == manager' \
-    --mount type=bind,src=//var/run/docker.sock,dst=/var/run/docker.sock \
-    --mount type=volume,src=portainer_data,dst=/data \
-    portainer/portainer \
-        -H unix:///var/run/docker.sock --no-auth
-
-docker create \
-  --name=heimdall \
-  -v /var/data/heimdal:/config \
-  -e PGID=33 -e PUID=33  \
-  -p 8080:80 \
-  -e TZ='ls -la /etc/localtime | cut -d/ -f7-9' \
-  lsioarmhf/heimdall-aarch64
+docker run \
+  --name=cadvisor \
+  --detach=true \
+  --volume=/:/rootfs:ro \
+  --volume=/var/run:/var/run:rw \
+  --volume=/sys:/sys:ro \
+  --volume=/var/lib/docker/:/var/lib/docker:ro \
+  --publish=88:8080 \
+  --privileged \
+  --device-cgroup-rule 'c 195:* mrw' \
+  braingamer/cadvisor-arm:latest

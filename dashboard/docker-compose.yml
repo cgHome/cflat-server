@@ -7,9 +7,9 @@ networks:
 
 services:
   app:
-    image: lsioarmhf/heimdall-aarch64
+    image: lsioarmhf/heimdall
     volumes:
-    - /var/data/heimdall:/config
+      - /var/data/heimdall:/config
     networks:
       - proxy-net
     environment:
@@ -27,6 +27,6 @@ services:
       labels:
         traefik.enable: "true"  
         traefik.port: "80"
-        traefik.backend: "heimdall"
+        traefik.backend: "dashboard"
         traefik.frontend.rule: "PathPrefixStrip:/"
         traefik.docker.network: "traefik_proxy-net"

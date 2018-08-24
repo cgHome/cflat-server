@@ -58,11 +58,11 @@ runcmd:
   # Workaround 
   - sudo apt-get update && sudo apt-get install acl
 
-  - [ systemctl, restart, avahi-daemon ]
-  - [ systemctl, restart, docker ]
+  - systemctl restart avahi-daemon 
+  - systemctl restart docker
 
   - docker swarm init
-  - docker stack deploy -c <(curl -L https://raw.githubusercontent.com/cgHome/cflat-server/master/portainer/docker-compose.yml) portainer
+  - docker stack deploy -c <(curl -L https://raw.githubusercontent.com/cgHome/cflat-server/master/proxy/docker-compose.yml) proxy
  
   # registry
   - [ sudo, mkdir, -p, /var/data/registry ]

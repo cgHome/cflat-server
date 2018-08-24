@@ -1,3 +1,0 @@
-[submodule "monitor/docker-swarm-monitor"]
-	path = monitor/docker-swarm-monitor
-	url = https://github.com/uniba-ktr/docker-swarm-monitor

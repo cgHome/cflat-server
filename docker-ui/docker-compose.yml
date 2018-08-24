@@ -9,7 +9,7 @@ networks:
 #   external: true
 
 volumes:
-  portainer-data:
+  app-data:
 
 services:
   agent:
@@ -28,11 +28,11 @@ services:
       placement:
         constraints: [node.platform.os == linux]
 
-  portainer:
+  app:
     image: portainer/portainer
-    command: -H tcp://tasks.agent:9001 --tlsskipverify --no-auth --templates https://raw.githubusercontent.com/cgHome/cflat-server/master/portainer/templates.json
+    command: -H tcp://tasks.agent:9001 --tlsskipverify --no-auth --templates https://raw.githubusercontent.com/cgHome/cflat-server/master/proxy/templates.json
     volumes:
-      - portainer-data:/data
+      - app-data:/data
     ports:
       - 9000:9000
     networks:
@@ -53,6 +53,6 @@ services:
       labels:
         traefik.enable: "false" 
         traefik.port: "9000"
-        traefik.backend: "portainer"
-        traefik.frontend.rule: "PathPrefixStrip:/portainer"
-        traefik.docker.network: "mbase_proxy-net"
+        traefik.backend: "docker-ui"
+        traefik.frontend.rule: "PathPrefixStrip:/docker-ui"
+        traefik.docker.network: "traefik_proxy-net"

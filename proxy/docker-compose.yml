@@ -6,7 +6,7 @@ networks:
     driver: overlay
 
 services:
-  traefik:
+  app:
     image: traefik:latest
     command:
       - "--api"
@@ -24,7 +24,7 @@ services:
     ports:
       - 80:80
       - 443:443
-      #- 8080:8080
+      - 8888:8080
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       #- /dev/null:/traefik.toml
@@ -39,8 +39,8 @@ services:
       restart_policy:
         condition: on-failure
       labels:
-        traefik.enable: "true"
+        traefik.enable: "false"       # Not working a the moment issue: traefik/3282
         traefik.port: "8080"
-        traefik.backend: "traefik"
-        traefik.frontend.rule: "PathPrefixStrip:/traefik"
+        traefik.backend: "proxy"
+        traefik.frontend.rule: "PathPrefixStrip:/proxy"
         traefik.docker.network: "traefik_proxy-net"
