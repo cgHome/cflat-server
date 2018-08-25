@@ -62,22 +62,8 @@ runcmd:
   - systemctl restart docker
 
   - docker swarm init
-  - docker stack deploy -c <(curl -L https://raw.githubusercontent.com/cgHome/cflat-server/master/proxy/docker-compose.yml) proxy
- 
-  # registry
-  - [ sudo, mkdir, -p, /var/data/registry ]
-  - [
-      docker, service, create, 
-       "--detach=false",
-       "--name registry",
-       "--publish 5000:5000",
-       "--replicas 1",
-       "--constraint  node.role==manager",
-       "--mount  type=bind,src=/var/data/registry,dst=/var/lib/registry,ro",
-       "--no-resolve-image",
-       "cblomart/rpi-registry"
-    ]
-   
+  - docker stack deploy -c <(curl -L https://raw.githubusercontent.com/cgHome/cflat-server/master/system/docker-compose.yml) system
+    
 power_state:
   message: "*** Reboot after runcmd is finished ***"
 #  mode: reboot

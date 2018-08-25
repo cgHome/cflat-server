@@ -74,7 +74,7 @@ runcmd:
   #- docker service create --detach=false --name portainer_app --network traefik_agent-net --publish 9000:9000 --replicas=1 --constraint 'node.role == manager' --mount type=bind,src=/var/data/portainer,dst=/data portainer/portainer -H 'tcp://tasks.portainer_agent:9001' --tlsskipverify --no-auth
   
   # registry
-  - [ sudo, mkdir, -p, /var/data/registry ]
+  - sudo mkdir -p /var/data/registry
   - docker service create --detach=false --name registry --publish 5000:5000 --replicas 1 --constraint node.role==manager --mount type=bind,src=/var/data/registry,dst=/var/lib/registry,ro --no-resolve-image cblomart/rpi-registry
    
 power_state:
