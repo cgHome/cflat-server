@@ -38,7 +38,8 @@ services:
     deploy:
       mode: global
       placement:
-        constraints: [node.role == manager]
+        constraints: 
+          - 'node.role == manager'
       update_config:
         parallelism: 1
         delay: 10s
@@ -48,11 +49,11 @@ services:
         traefik.enable: "false"       # Not working a the moment issue: traefik/3282
         traefik.port: "8080"
         traefik.backend: "traefik"
-        traefik.frontend.rule: "PathPrefixStrip:/traefik"
+        traefik.frontend.rule: "PathPrefixStrip:/proxy"
         traefik.docker.network: "system_traefik-net"
 
-  agent:
-    image: portainer/agent
+  portainer-agent:
+    image: portainer/agent:latest
     environment:
       AGENT_CLUSTER_ADDR: tasks.agent
       # AGENT_PORT: 9001
@@ -65,10 +66,11 @@ services:
     deploy:
       mode: global
       placement:
-        constraints: [node.platform.os == linux]
+        constraints: 
+        - 'node.platform.os == linux'
 
   portainer:
-    image: portainer/portainer
+    image: portainer/portainer:latest
     command: -H tcp://tasks.agent:9001 --tlsskipverify --no-auth --templates https://raw.githubusercontent.com/cgHome/cflat-server/master/system/portainer-templates.json
     volumes:
       - portainer-data:/data
@@ -83,7 +85,8 @@ services:
       mode: replicated
       replicas: 1
       placement:
-        constraints: [node.role == manager]
+        constraints:
+          - 'node.role == manager'
       update_config:
         parallelism: 1
         delay: 10s
@@ -95,3 +98,15 @@ services:
         traefik.backend: "docker"
         traefik.frontend.rule: "PathPrefixStrip:/docker"
         traefik.docker.network: "system_traefik-net"
+
+  registry:
+    image: cblomart/rpi-registry:latest
+    #image: registry:2
+    ports:
+      - 5000:5000
+    volumes:
+      - /var/data/registry:/var/lib/registry    
+    deploy:
+      placement:
+        constraints:
+          - 'node.role == manager'

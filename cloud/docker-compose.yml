@@ -1,12 +1,12 @@
 version: '3.6'
 
 networks: 
-  proxy-net:
-    name: traefik_proxy-net
+  traefik-net:
+    name: system_traefik-net
     external: true
 
 volumes:
-  config-data:
+  traefik-data:
 
 services:
   app:
@@ -14,9 +14,9 @@ services:
     ports:
       - 8080:80
     networks:
-      - proxy-net
+      - traefik-net
     volumes:
-      - config-data:/var/www/html
+      - traefik-data:/var/www/html
       - /var/data/cloud:/var/www/html/data
     environment:
       PUID: 33		#www-data	
@@ -33,7 +33,7 @@ services:
       labels:
         traefik.enable: "false"        # todo: cflat-srv/cloud is not working -> use: sflat-srv.local:8080
         traefik.port: "80"
-        traefik.backend: "cloud"
+        traefik.backend: "nextcloud"
         traefik.default.protocol: "http"
         traefik.frontend.rule: "PathPrefixStrip:/cloud"
-        traefik.docker.network: "traefik_proxy-net"
+        traefik.docker.network: "system_traefik-net"

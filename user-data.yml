@@ -48,9 +48,11 @@ write_files:
 
 # These commands will be ran on every boot
 bootcmd:
-  # Build Persisten-Disc: USB-disk/vol:data -> /var/data
+  # Build Persisten-Disc: USB-disk/volume:data -> /var/data
   - sudo mkdir -p /var/data
   - sudo mount /dev/disk/by-label/data /var/data
+  - sudo mkdir -p /var/data/registry 
+  - sudo mkdir -p /var/data/heimdall 
   - sudo chown -R www-data:www-data /var/data/
 
 # These commands will be ran once on first boot only

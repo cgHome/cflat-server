@@ -1,21 +1,22 @@
 version: '3.6'
 
 networks: 
-  proxy-net:
-    name: traefik_proxy-net
+  traefik-net:
+    name: system_traefik-net
     external: true
 
 services:
-  app:
+  heimdall:
     image: lsioarmhf/heimdall
     volumes:
       - /var/data/heimdall:/config
     networks:
-      - proxy-net
+      - traefik-net
     environment:
       PUID: 33		#www-data	
       PGID: 33		#www-data
-      # TZ: $(ls -la /etc/localtime | cut -d/ -f8-9)
+      # TZ: ${ls -la /etc/localtime | cut -d/ -f7-9}
+      TZ: "Europe/Zurich"
     deploy:
       placement:
         constraints: [node.role == manager]
@@ -29,4 +30,4 @@ services:
         traefik.port: "80"
         traefik.backend: "dashboard"
         traefik.frontend.rule: "PathPrefixStrip:/"
-        traefik.docker.network: "traefik_proxy-net"
+        traefik.docker.network: "system_traefik-net"
