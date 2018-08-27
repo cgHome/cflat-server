@@ -52,7 +52,7 @@ services:
         traefik.frontend.rule: "PathPrefixStrip:/proxy"
         traefik.docker.network: "system_traefik-net"
 
-  portainer-agent:
+  agent:
     image: portainer/agent:latest
     environment:
       AGENT_CLUSTER_ADDR: tasks.agent
