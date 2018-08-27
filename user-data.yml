@@ -57,13 +57,13 @@ bootcmd:
 
 # These commands will be ran once on first boot only
 runcmd:
+  - systemctl restart avahi-daemon 
+  - systemctl restart docker
+  - docker swarm init
+
   # Workaround 
   - sudo apt-get update && sudo apt-get install acl
 
-  - systemctl restart avahi-daemon 
-  - systemctl restart docker
-
-  - docker swarm init
   - docker stack deploy -c <(curl -L https://raw.githubusercontent.com/cgHome/cflat-server/master/system/docker-compose.yml) system
     
 power_state:
