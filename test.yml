@@ -68,6 +68,8 @@ runcmd:
   #- curl -L https://github.com/cgHome/cflat-server/tarball/master | tar xz -C /home/admin --strip=1 --one-top-level=cflat-server
   #- docker stack deploy -c /home/admin/cflat-server/portainer/docker-compose.yml portainer
 
+  #- docker stack deploy -c <(curl -L https://raw.githubusercontent.com/cgHome/cflat-server/master/system/docker-compose.yml) system
+
   #- sudo mkdir -p /var/data/portainer
   #- docker network create --driver overlay --attachable traefik_agent-net
   #- docker service create --detach=false --name portainer_agent --network traefik_agent-net -e  AGENT_CLUSTER_ADDR=tasks.portainer_agent --mode global --constraint 'node.platform.os == linux' --mount type=bind,src=//var/run/docker.sock,dst=/var/run/docker.sock portainer/agent

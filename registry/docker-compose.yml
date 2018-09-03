@@ -1,0 +1,19 @@
+version: '3.6'
+
+networks:
+  traefik-net:
+    name: system_traefik-net
+    driver: overlay
+
+services:
+  app:
+    image: cblomart/rpi-registry:latest
+    #image: registry:2
+    ports:
+      - 5000:5000
+    volumes:
+      - /var/data/registry:/var/lib/registry    
+    deploy:
+      placement:
+        constraints:
+          - 'node.role == manager'

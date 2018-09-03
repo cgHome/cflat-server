@@ -6,7 +6,7 @@ networks:
     external: true
 
 volumes:
-  traefik-data:
+  nextcloud-data: 
 
 services:
   app:
@@ -16,7 +16,7 @@ services:
     networks:
       - traefik-net
     volumes:
-      - traefik-data:/var/www/html
+      - nextcloud-data:/var/www/html
       - /var/data/cloud:/var/www/html/data
     environment:
       PUID: 33		#www-data	

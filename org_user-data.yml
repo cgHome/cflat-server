@@ -1,0 +1,110 @@
+#cloud-config
+# vim: syntax=yaml
+#
+
+hostname: cflat-srv
+manage_etc_hosts: true
+
+resize_rootfs: true
+growpart:
+    mode: auto
+    devices: ["/"]
+    ignore_growroot_disabled: false
+
+users:
+  - name: admin
+    gecos: "Hypriot Pirate"
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    shell: /bin/bash
+    groups: users,docker,video
+    plain_text_passwd: hypriot
+    lock_passwd: false
+    ssh_pwauth: true
+    chpasswd: { expire: false }
+
+package_update: true
+package_upgrade: true
+package_reboot_if_required: true
+packages:
+  - ntp
+
+locale: "en_US.UTF-8"
+timezone: "Europe/Zurich"
+
+write_files:
+    - path: "/etc/docker/daemon.json"
+      owner: "root:root"
+      content: |
+        {
+          "labels": [ "os=linux", "arch=arm64" ],
+          "experimental": true
+        }
+
+bootcmd:
+  # Build Persisten-Disc: USB-disk/volume:data -> /var/data
+  - sudo mkdir -p /var/data
+  - sudo mount /dev/disk/by-label/data /var/data
+  - sudo chown -R www-data:www-data /var/data/
+
+runcmd:
+  - systemctl restart avahi-daemon 
+  - systemctl restart docker
+
+  - docker swarm init
+  - [
+      docker, network, create, 
+      "--driver", "overlay",
+      "--attachable", "portainer_agent-net"
+    ]
+  - [
+      docker, service, create,
+      "--detach=false",
+      "--name", "portainer_agent",
+      "--network", "portainer_agent-net",
+      "--env", "AGENT_CLUSTER_ADDR=tasks.portainer_agent",
+      "--mode", "global",
+      "--constraint", "node.platform.os == linux",
+      "--mount", "type=bind,src=//var/run/docker.sock,dst=/var/run/docker.sock",
+      "--mount", "type=bind,src=//var/lib/docker/volumes,dst=/var/lib/docker/volumes",
+      "portainer/agent"
+    ]
+  - [
+      docker, service, create,
+      "--detach=false",
+      "--name", "portainer",
+      "--network", "portainer_agent-net",
+      "--publish", "9000:9000",
+      "--replicas=1",
+      "--constraint", "node.role == manager",
+      "--mount", "type=volume,src=portainer,dst=/data",
+      "portainer/portainer", "-H", "tcp://tasks.portainer_agent:9001", "--tlsskipverify", "--no-auth"
+    ]
+  - [mkdir, "-p", "/var/data/cloud" ]
+  - [setfacl, "-m", "u:www-data:rwx,g:www-data:rwx", "/var/data/cloud" ]
+  - [
+      docker, service, create,
+      "--detach=false",
+      "--name", "nextcloud",
+      "--publish", "8080:80",
+      "--mount", "type=volume,src=nextcloud,dst=/var/www/html",
+      "--mount", "type=bind,src=//var/data/cloud,dst=/var/www/html/data",
+      "--env", "PUID=33",
+      "--env", "PGID=33",
+      "--env", "SQLITE_DATABASE=nextcloud",
+      "--env", "NEXTCLOUD_ADMIN_USER=admin",
+      "--env", "NEXTCLOUD_ADMIN_PASSWORD=hypriot",
+      "nextcloud"
+    ]
+  - [mkdir, "-p", "/var/data/heimdall" ]
+  - [setfacl, "-m", "u:www-data:rwx,g:www-data:rwx", "/var/data/heimdall" ]
+  - [
+      docker, service, create,
+      "--detach=false",
+      "--name", "heimdall",
+      "--publish", "80:80",
+      "--mount", "type=bind,src=//var/data/heimdall,dst=/config",
+      "--env", "PUID=33",
+      "--env", "PGID=33",
+      "--env", "TZ=Europe/Zurich",
+      "lsioarmhf/heimdall"
+    ]

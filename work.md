@@ -6,6 +6,9 @@
 
 - flash --userdata ./user-data.yml ./hypriotos-rpi-v1.9.0.img
 
+## Add
+
+- https://github.com/uniba-ktr/docker-swarm-monitor
 
 # This gives the [nextcloud] permissions to write to this directory since it runs as www-data
 # - sudo mkdir -p /var/data/nextcloud
@@ -15,22 +18,12 @@ https://jaxenter.de/docker-swarm-einfuehrung-65263
 
 docker run --rm -it debian dpkg --print-architecture
 
-traefik:
-  image: traefik
-  command: --web --docker --docker.watch --docker.domain=localhost --logLevel=DEBUG --entryPoints="Name:http Address::80"
-  ports:
-    - "80:80"
-    - "8080:8080"
-  volumes:
-    - /var/run/docker.sock:/var/run/docker.sock
-    - /dev/null:/traefik.toml
-
   # traefik
   - [
       docker, service, create,
         "--name" , "traefik",
         "--constraint=node.role==manager",
-        "--publish", "80:80", 
+        "--publish", "80:80",
         "--publish", "8080:8080",
         "--mount", "type=bind,source=/var/run/docker.sock,target=/var/run/docker.sock",
         "--network", "proxy",

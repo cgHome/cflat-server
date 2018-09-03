@@ -96,17 +96,5 @@ services:
         traefik.enable: "false" 
         traefik.port: "9000"
         traefik.backend: "docker"
-        traefik.frontend.rule: "PathPrefixStrip:/docker"
+        traefik.frontend.rule: "PathPrefixStrip:/docker-ui"
         traefik.docker.network: "system_traefik-net"
-
-  registry:
-    image: cblomart/rpi-registry:latest
-    #image: registry:2
-    ports:
-      - 5000:5000
-    volumes:
-      - /var/data/registry:/var/lib/registry    
-    deploy:
-      placement:
-        constraints:
-          - 'node.role == manager'
